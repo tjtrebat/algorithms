@@ -1,3 +1,7 @@
+"""
+Find the fastest way through a factory using recursive and dynamic programming techniques.
+"""
+
 __author__ = 'Tom'
 
 class AssemblyLineScheduler:
