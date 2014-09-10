@@ -1,4 +1,5 @@
 algorithms
 ==========
 
-Implementations of various algorithms from CLRS.
+Implementation of the pseudocode presented in, "Introduction to Algorithms" by Thomas H. Cormen.
+
