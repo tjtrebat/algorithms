@@ -1,5 +1,5 @@
 algorithms
 ==========
 
-Implementation of the pseudocode presented in, "Introduction to Algorithms" by Thomas H. Cormen.
+Implementation of various algorithms and the pseudocode in "Introduction to Algorithms" by Thomas H. Cormen.
 
