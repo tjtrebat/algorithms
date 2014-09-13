@@ -4,19 +4,19 @@ algorithms
 Implementation of various algorithms based mostly on the pseudocode presented in "Introduction to Algorithms" by
 Thomas H. Cormen.
 
-#### Dynamic Programming
+##### Dynamic Programming
 * Assembly-line scheduling
 * Longest common subsequence
 * Matrix-chain multiplication
 * Optimal binary search trees
 
-#### Graph algorithms
+##### Graph algorithms
 * Breadth-first search
 * Depth-first search
 * Maximum Flow
 * Minimum Spanning Trees
 
-#### Sorting
+##### Sorting
 * Heapsort
 * Quicksort/Select
 
