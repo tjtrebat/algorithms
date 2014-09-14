@@ -94,33 +94,33 @@ class AssemblyLineCanvas:
         i = self.als.fastest_line
         self.draw_highlighted_line(
             200 + 150 * (self.als.num_stations - 1),
-            150 + 200 * (i - 1),
+            150 + 200 * i,
             125 + 150 * (self.als.num_stations - 1),
-            75 + 350 * (i - 1),
-            math.pi / 4 if not i - 1 else -math.pi / 4)
+            75 + 350 * i,
+            math.pi / 4 if not i else -math.pi / 4)
         for j in range(self.als.num_stations - 2, -1, -1):
-            prev_line = self.als.assembly_lines[i - 1].fastest_lines[j]
+            prev_line = self.als.assembly_lines[i].fastest_lines[j]
             if i != prev_line:
                 self.draw_highlighted_line(
                     125 + 150 * (j + 1),
-                    75 + 350 * (i - 1),
+                    75 + 350 * i,
                     125 + 150 * j,
-                    75 + 350 * (prev_line - 1),
-                    math.atan(float(7) / 3) if not prev_line - 1 else -math.atan(float(7) / 3))
+                    75 + 350 * prev_line,
+                    math.atan(float(7) / 3) if not prev_line else -math.atan(float(7) / 3))
             else:
                 self.draw_highlighted_line(
                     125 + 150 * (j + 1),
-                    75 + 350 * (i - 1),
+                    75 + 350 * i,
                     125 + 150 * j,
-                    75 + 350 * (prev_line - 1),
+                    75 + 350 * prev_line,
                     0)
             if not j:
                 self.draw_highlighted_line(
                     125,
-                    75 + 350 * (prev_line - 1),
+                    75 + 350 * prev_line,
                     50,
-                    150 + 200 * (prev_line - 1),
-                    -math.pi / 4 if not prev_line - 1 else math.pi / 4)
+                    150 + 200 * prev_line,
+                    -math.pi / 4 if not prev_line else math.pi / 4)
             i = prev_line
 
     def draw_highlighted_line(self, x1, y1, x2, y2, r):
