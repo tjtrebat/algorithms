@@ -90,6 +90,8 @@ class AssemblyLineScheduler:
             print "line %d, station %d" % (i + 1, j + 1,)
 
     def print_stations_in_order(self):
+        """ Prints the fastest way through the factory in order.
+        """
         for i in range(self.num_stations):
             line = self.fastest_line
             for j in range(self.num_stations - 2, i - 1, -1):
