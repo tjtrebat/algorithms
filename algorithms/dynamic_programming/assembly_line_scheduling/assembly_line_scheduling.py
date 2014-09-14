@@ -1,5 +1,5 @@
 """
-Find the fastest way through a factory using recursive and dynamic programming techniques.
+Solves the assembly-line scheduling problem for determining the fastest route through a factory.
 """
 
 __author__ = 'Tom'
@@ -28,19 +28,20 @@ class AssemblyLineScheduler:
         # line plus the transfer time, to calculate the fastest time.
         for j in range(1, self.num_stations):
             for i, line in enumerate(self.assembly_lines):
-                other_line = self.assembly_lines[(i + 1) % 2] # variable for the other assembly line
-                station, other_station = line.stations[j], other_line.stations[j - 1] # variables for previous stations
+                station = line.stations[j]
                 # fastest time to the previous station on the same line
-                line_time = line.fastest_times[j - 1]
+                line_time = line.fastest_times[j - 1] + station.assembly_time
+                other_line = self.assembly_lines[(i + 1) % 2] # variable for the other assembly line
                 # fastest time to the previous station on the other line plus the transfer time
-                other_line_time = other_line.fastest_times[j - 1] + other_station.transfer_time
+                other_line_time = (other_line.fastest_times[j - 1] + other_line.stations[j - 1].transfer_time
+                                   + station.assembly_time)
                 if line_time <= other_line_time:
-                    line.fastest_times[j] = line_time + station.assembly_time
+                    line.fastest_times[j] = line_time
                     line.fastest_lines[j - 1] = i + 1
                 else:
-                    line.fastest_times[j] = other_line_time + station.assembly_time
+                    line.fastest_times[j] = other_line_time
                     line.fastest_lines[j - 1] = ((i + 1) % 2) + 1
-        # Calculate the fastest time and line after exiting.
+        # Calculate the fastest time and line after exiting the factory.
         self.fastest_time = float("inf")
         for i, line in enumerate(self.assembly_lines):
             finishing_time = line.fastest_times[self.num_stations - 1] + line.exit_time
@@ -48,39 +49,36 @@ class AssemblyLineScheduler:
                 self.fastest_time = finishing_time
                 self.fastest_line = i + 1
 
-    def recursive_fastest_way(self, n, line):
-        """ A recursive solution to fastest_way.
+    def fastest_way_recursive(self):
+        """ Sets up a recursion for finding a solution to the assembly-line scheduling problem.
         """
-        if n == self.num_stations:
-            t_line1 = self.recursive_fastest_way(n - 1, 0) + self.assembly_lines[0].exit_time
-            t_line2 = self.recursive_fastest_way(n - 1, 1) + self.assembly_lines[1].exit_time
-            if t_line1 <= t_line2:
-                self.fastest_time = t_line1
-                self.fastest_line = 1
+        # Calculate the fastest time to the first station for use as a basis in our recursion.
+        for line in self.assembly_lines:
+            line.fastest_times[0] = line.entry_time + line.stations[0].assembly_time
+        # Calculate the fastest time and line after exiting the factory.
+        self.fastest_time = float("inf")
+        for i, line in enumerate(self.assembly_lines):
+            finishing_time = self._fastest_way_recursive(self.num_stations - 1, line, i) + line.exit_time
+            if finishing_time < self.fastest_time:
+                self.fastest_time = finishing_time
+                self.fastest_line = i + 1
+
+    def _fastest_way_recursive(self, n, line, i):
+        """ A recursive method that is called in fastest_way_recursive.
+        """
+        if n:
+            station = line.stations[n]
+            line_time = self._fastest_way_recursive(n - 1, line, i) + station.assembly_time
+            other_line = self.assembly_lines[(i + 1) % 2]
+            other_line_time = (self._fastest_way_recursive(n - 1, other_line, (i + 1) % 2)
+                           + other_line.stations[n - 1].transfer_time + station.assembly_time)
+            if line_time <= other_line_time:
+                line.fastest_times[n] = line_time
+                line.fastest_lines[n - 1] = i + 1
             else:
-                self.fastest_time = t_line2
-                self.fastest_line = 2
-            return self.fastest_time
-        else:
-            if not n:
-                fastest_time = (self.assembly_lines[line].stations[n].assembly_time
-                                + self.assembly_lines[line].entry_time)
-            else:
-                other_line = (line + 1) % len(self.assembly_lines)
-                assembly_time = self.assembly_lines[line].stations[n].assembly_time
-                t_same_line = self.recursive_fastest_way(n - 1, line) + assembly_time
-                t_diff_line = (self.recursive_fastest_way(n - 1, other_line)
-                               + self.assembly_lines[other_line].stations[n - 1].transfer_time + assembly_time)
-                if t_same_line <= t_diff_line:
-                    if n:
-                        self.assembly_lines[line].fastest_lines[n - 1] = line + 1
-                    fastest_time = t_same_line
-                else:
-                    if n:
-                        self.assembly_lines[line].fastest_lines[n - 1] = other_line + 1
-                    fastest_time = t_diff_line
-            self.assembly_lines[line].fastest_times[n] = fastest_time
-        return self.assembly_lines[line].fastest_times[n]
+                line.fastest_times[n] = other_line_time
+                line.fastest_lines[n - 1] = ((i + 1) % 2) + 1
+        return line.fastest_times[n]
 
     def print_stations(self):
         """ Prints the fastest way through the factory.
@@ -112,23 +110,25 @@ class AssemblyLineScheduler:
     def __str__(self):
         """ A string representation of a factory showing assembly and transfer times of the stations.
         """
-        s = ""
-        s += "\t%s\n" % str(self.assembly_lines[0])
-        s += "%s%s%s\n" % (str(self.assembly_lines[0].entry_time),
-                               "\t" * (len(self.assembly_lines[0].stations) + 1),
-                                self.assembly_lines[0].exit_time,)
-        for station in self.assembly_lines[0].stations:
-            if station.transfer_time is not None:
-                s += "\t  " + str(station.transfer_time)
-        s += "\n"
-        for station in self.assembly_lines[1].stations:
-            if station.transfer_time is not None:
-                s += "\t  " + str(station.transfer_time)
-        s += "\n"
-        s += "%s%s%s\n" % (str(self.assembly_lines[1].entry_time),
-                               "\t" * (len(self.assembly_lines[1].stations) + 1),
-                               self.assembly_lines[1].exit_time,)
-        s += "\t%s\n" % str(self.assembly_lines[1])
+        str_als = ""
+        # print out fastest times
+        station_numbers = lambda start: "j".ljust(9) + "".join(
+            map(lambda x: str(x).ljust(10), range(start, als.num_stations + 1)))
+        s = station_numbers(1) + "\n"
+        for i, line in enumerate(als.assembly_lines):
+            fastest_times = "f%d[j]".ljust(10) % (i + 1)
+            for j in range(als.num_stations):
+                fastest_times += str(line.fastest_times[j]).ljust(10)
+            s += fastest_times + "\n"
+        s += "f* = %d\n" % als.fastest_time + "\n"
+        # print out fastest lines
+        s += station_numbers(2) + "\n"
+        for i, line in enumerate(als.assembly_lines):
+            fastest_lines = "l%d[j]".ljust(10) % (i + 1)
+            for j in range(als.num_stations - 1):
+                fastest_lines += str(line.fastest_lines[j]).ljust(10)
+            s += fastest_lines + "\n"
+        s += "l* = %d\n" % als.fastest_line
         return s
 
 class AssemblyLine:
@@ -195,33 +195,12 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Finds the fastest way through a factory')
     parser.add_argument('infile', type=argparse.FileType('r'))
-    parser.add_argument('--print-stations', action='store_true', help='print stations')
+    parser.add_argument('--recursive', action='store_true', help='use recursion')
     args = parser.parse_args()
     als = AssemblyLineScheduler.read_assembly_lines(args.infile)
-    als.fastest_way()
-    # printing output...
-    if args.print_stations:
-        # print stations
-        for j in range(als.num_stations):
-            print "line %d, station %d" % (als.print_stations_in_order(j), j + 1,)
+    if args.recursive:
+        als.fastest_way_recursive()
     else:
-        # print results
-        print als
-        # print out fastest times
-        f1, f2 = "", ""
-        for i in range(als.num_stations):
-            f1 += str(als.assembly_lines[0].fastest_times[i]).ljust(10)
-            f2 += str(als.assembly_lines[1].fastest_times[i]).ljust(10)
-        print "j".ljust(10) + "".join(map(lambda x: str(x).ljust(10), range(1, als.num_stations + 1)))
-        print "f1[j]".ljust(10) + f1
-        print "f2[j]".ljust(10) + f2
-        print "f* = %d\n" % als.fastest_time
-        # print out fastest lines
-        l1, l2 = "", ""
-        for i in range(als.num_stations - 1):
-            l1 += str(als.assembly_lines[0].fastest_lines[i]).ljust(10)
-            l2 += str(als.assembly_lines[1].fastest_lines[i]).ljust(10)
-        print "j".ljust(10) + "".join(map(lambda x: str(x).ljust(10), range(2, als.num_stations + 1)))
-        print "l1[j]".ljust(10) + l1
-        print "l2[j]".ljust(10) + l2
-        print "l* = %d\n" % als.fastest_line
+        als.fastest_way()
+    for j in range(als.num_stations):
+        print "line %d, station %d" % (als.print_stations_in_order(j), j + 1,)
