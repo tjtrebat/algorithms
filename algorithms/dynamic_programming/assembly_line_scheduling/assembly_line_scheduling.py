@@ -110,7 +110,6 @@ class AssemblyLineScheduler:
     def __str__(self):
         """ A string representation of the assembly-line scheduling problem.
         """
-        str_als = ""
         # print out fastest times
         station_numbers = lambda start: "j".ljust(9) + "".join(
             map(lambda x: str(x).ljust(10), range(start, als.num_stations + 1)))
