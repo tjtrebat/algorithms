@@ -66,7 +66,7 @@ class AssemblyLineScheduler:
     def _fastest_way_recursive(self, n, line, i):
         """ A recursive method that is called in fastest_way_recursive.
         """
-        if n:
+        if n > 0:
             station = line.stations[n]
             line_time = self._fastest_way_recursive(n - 1, line, i) + station.assembly_time
             other_line = self.assembly_lines[(i + 1) % 2]
