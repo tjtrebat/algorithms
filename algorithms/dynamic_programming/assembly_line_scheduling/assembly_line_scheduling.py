@@ -19,33 +19,29 @@ class AssemblyLineScheduler:
     def fastest_way(self):
         """ Find the fastest way through a factory using dynamic programming techniques.
         """
-        # For each line, calculate the fastest time to the first station.
+        # calculate the fastest time to the first station on each line
         for line in self.assembly_lines:
-            line.fastest_times[0] = line.stations[0].assembly_time + line.entry_time # sum assembly and entry times
-        # Calculate the fastest time to the station for each station number and for each line.
+            line.fastest_times[0] = line.stations[0].assembly_time + line.entry_time
         for j in range(1, self.num_stations):
             for i, line in enumerate(self.assembly_lines):
-                station = line.stations[j] # the station's fastest time we are calculating
-                line_time = line.fastest_times[j - 1] + station.assembly_time # previous fastest time on the same line.
-                other_line = self.assembly_lines[(i + 1) % 2] # a variable for the opposite line
-                # previous fastest time on the other line plus time to transfer to station
+                station = line.stations[j]
+                # get fastest time from previous station on the same line
+                line_time = line.fastest_times[j - 1] + station.assembly_time
+                other_line = self.assembly_lines[(i + 1) % 2]
+                # get fastest time from previous station on the other line plus the transfer time
                 other_line_time = (other_line.fastest_times[j - 1] + other_line.stations[j - 1].transfer_time
                                    + station.assembly_time)
+                # assign the smaller of the two times to the station's fastest time
                 if line_time <= other_line_time:
-                    # If it takes less time to stay on the same line, then assign the fastest time to the station to
-                    # line_time and fastest line to i: the line number.
                     line.fastest_times[j] = line_time
                     line.fastest_lines[j - 1] = i
                 else:
-                    # Otherwise, assign fastest time to station to other_line_time, and fastest line to (i + 1) % 2.
                     line.fastest_times[j] = other_line_time
                     line.fastest_lines[j - 1] = (i + 1) % 2
-        # Assign self.fastest_time to the fastest time once visited all stations and exiting the line.
-        self.fastest_time = float("inf") # assign self.fastest_time to an arbitrarily large float
+        # set self.fastest_time to the fastest time upon exiting the line
+        self.fastest_time = float("inf")
         for i, line in enumerate(self.assembly_lines):
-            # calculate the fastest time to leave line i
             finishing_time = line.fastest_times[self.num_stations - 1] + line.exit_time
-            # check if finishing_time is less than self.fastest_time and make assignments to variables.
             if finishing_time < self.fastest_time:
                 self.fastest_time = finishing_time
                 self.fastest_line = i
@@ -53,10 +49,10 @@ class AssemblyLineScheduler:
     def fastest_way_recursive(self):
         """ A wrapper function for a recursive method used to solve the assembly-line scheduling problem.
         """
-        # Calculate the fastest time to the first station for use as a basis in our recursion.
+        # calculate the fastest time to the first station on each line
         for line in self.assembly_lines:
             line.fastest_times[0] = line.stations[0].assembly_time + line.entry_time
-        # Calculate the fastest time and line after exiting the factory.
+        # set self.fastest_time to the fastest time upon exiting the line
         self.fastest_time = float("inf")
         for i, line in enumerate(self.assembly_lines):
             finishing_time = self._fastest_way_recursive(self.num_stations - 1, line, i) + line.exit_time
@@ -152,16 +148,14 @@ class AssemblyLine:
     def read_assembly_line(cls, txt):
         """ Reads lines of text that describe an individual assembly line.
         """
-        # Read the first line of text containing the entry, exit times separated by a space.
-        entry_time, exit_time = map(int, txt[0].split(" "))
-        # Read the third line that contains the transfer times separated by spaces.
-        transfers = map(int, txt[2].split(" "))
-        # Reads the second line of text containing assembly times.
+        entry_time, exit_time = map(int, txt[0].split(" ")) # reads entry and exit times
+        transfers = map(int, txt[2].split(" ")) # reads transfer times
         stations = []
+        # read the assembly times
         for i, at in enumerate(map(int, txt[1].split(" "))):
-            if i < len(transfers): # appends a Station w/ transfer
+            if i < len(transfers):
                 stations.append(Station(at, transfers[i]))
-            else: # appends the last station
+            else:
                 stations.append(Station(at))
         return AssemblyLine(entry_time, exit_time, stations)
 
@@ -181,7 +175,7 @@ class Station:
 
         Attributes:
             assembly_time -- the assembly time
-            transfer_time -- the transfer time to the next station on the other line
+            transfer_time -- the transfer time to the next station on separate line
         """
         self.assembly_time = assembly_time
         self.transfer_time = transfer_time
