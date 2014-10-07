@@ -206,9 +206,9 @@ if __name__ == "__main__":
     parser.add_argument('infile', type=argparse.FileType('r'))
     parser.add_argument('--recursive', action='store_true', help='use a recursive method to solve')
     args = parser.parse_args()
-    assembly_line_1, assembly_line_2 = read_assembly_lines_from_file(args.infile)
-    if assembly_line_1 and assembly_line_2 is not None:
-        als = AssemblyLineScheduler(assembly_line_1, assembly_line_2)
+    assembly_lines = read_assembly_lines_from_file(args.infile)
+    if assembly_lines is not None:
+        als = AssemblyLineScheduler(*assembly_lines)
         if args.recursive:
             als.fastest_way_recursive()
         else:

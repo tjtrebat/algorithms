@@ -143,9 +143,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Finds the fastest way through a factory')
     parser.add_argument('infile', type=argparse.FileType('r'))
     args = parser.parse_args()
-    assembly_line_1, assembly_line_2 = read_assembly_lines_from_file(args.infile)
-    if assembly_line_1 and assembly_line_2 is not None:
-        als = AssemblyLineScheduler(assembly_line_1, assembly_line_2)
+    assembly_lines = read_assembly_lines_from_file(args.infile)
+    if assembly_lines is not None:
+        als = AssemblyLineScheduler(*assembly_lines)
         root = Tk()
         AssemblyLineCanvas(root, als)
         root.mainloop()
