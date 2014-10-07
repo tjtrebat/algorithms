@@ -5,7 +5,7 @@ Solves the assembly-line scheduling problem for determining the fastest way thro
 __author__ = 'Tom'
 
 class AssemblyLineScheduler:
-    def __init__(self, line1, line2, num_stations):
+    def __init__(self, line1, line2):
         """ Constructs an AssemblyLineScheduler.
 
         Attributes:
@@ -13,8 +13,8 @@ class AssemblyLineScheduler:
             line2 -- the second line
             num_stations -- the number of stations on a line
         """
-        self.num_stations = num_stations
         self.assembly_lines = (line1, line2,)
+        self.num_stations = len(line1.stations)
 
     def fastest_way(self):
         """ Find the fastest way through a factory using dynamic programming techniques.
@@ -95,14 +95,6 @@ class AssemblyLineScheduler:
                 line = self.assembly_lines[line].fastest_lines[j]
             print "line %d, station %d" % (line + 1, i + 1,)
 
-    @classmethod
-    def read_assembly_lines(cls, infile):
-        """ Reads in AssemblyLines from a file and returns an AssemblyLineScheduler.
-        """
-        lines = infile.read().split("\n")
-        a1, a2 = AssemblyLine.read_assembly_line(lines[:3]), AssemblyLine.read_assembly_line(lines[3:])
-        return AssemblyLineScheduler(a1, a2, len(a1.stations))
-
     def __str__(self):
         """ A string representation of the assembly-line scheduling problem.
         """
@@ -121,9 +113,9 @@ class AssemblyLineScheduler:
         for i, line in enumerate(als.assembly_lines):
             fastest_lines = "l%d[j]".ljust(10) % (i + 1)
             for j in range(als.num_stations - 1):
-                fastest_lines += str(line.fastest_lines[j]).ljust(10)
+                fastest_lines += str(line.fastest_lines[j] + 1).ljust(10)
             s += fastest_lines + "\n"
-        s += "l* = %d\n" % als.fastest_line
+        s += "l* = %d\n" % (als.fastest_line + 1)
         return s
 
 class AssemblyLine:
@@ -145,19 +137,26 @@ class AssemblyLine:
         self.fastest_lines = [-1] * (len(stations) - 1)
 
     @classmethod
-    def read_assembly_line(cls, txt):
+    def read_assembly_line(cls, txt_line):
         """ Reads lines of text that describe an individual assembly line.
         """
-        entry_time, exit_time = map(int, txt[0].split(" ")) # reads entry and exit times
-        transfers = map(int, txt[2].split(" ")) # reads transfer times
-        stations = []
-        # read the assembly times
-        for i, at in enumerate(map(int, txt[1].split(" "))):
-            if i < len(transfers):
-                stations.append(Station(at, transfers[i]))
-            else:
-                stations.append(Station(at))
-        return AssemblyLine(entry_time, exit_time, stations)
+        arr_line = map(int, txt_line.split())
+        if len(arr_line) > 1:
+            entry_time, exit_time, stations = -1, -1, []
+            i = 0
+            while i < len(arr_line):
+                if not i:
+                    entry_time = arr_line[i]
+                elif len(arr_line) <= i + 1:
+                    exit_time = arr_line[i]
+                elif len(arr_line) > i:
+                    if len(arr_line) <= i + 2:
+                        stations.append(Station(arr_line[i]))
+                    else:
+                        stations.append(Station(arr_line[i], arr_line[i + 1]))
+                        i += 1
+                i += 1
+            return AssemblyLine(entry_time, exit_time, stations)
 
     def __str__(self):
         """ A string representation of the AssemblyLine.
@@ -189,11 +188,19 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Finds the fastest way through a factory')
     parser.add_argument('infile', type=argparse.FileType('r'))
-    parser.add_argument('--recursive', action='store_true', help='use recursion')
+    parser.add_argument('--recursive', action='store_true', help='use a recursive method to solve')
     args = parser.parse_args()
-    als = AssemblyLineScheduler.read_assembly_lines(args.infile)
-    if args.recursive:
-        als.fastest_way_recursive()
-    else:
-        als.fastest_way()
-    als.print_stations_in_order()
+    infile = args.infile
+    txt = infile.read()
+    if txt:
+        lines = txt.split("\n")
+        if len(lines) > 1:
+            assembly_line_1 = AssemblyLine.read_assembly_line(lines[0])
+            assembly_line_2 = AssemblyLine.read_assembly_line(lines[1])
+            if assembly_line_1 and assembly_line_2 is not None:
+                als = AssemblyLineScheduler(assembly_line_1, assembly_line_2)
+                if args.recursive:
+                    als.fastest_way_recursive()
+                else:
+                    als.fastest_way()
+                als.print_stations_in_order()
