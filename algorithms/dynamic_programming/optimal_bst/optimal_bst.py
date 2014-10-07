@@ -13,14 +13,14 @@ class OptimalBST:
     def optimal_bst(self, n):
         e = dict()
         w = dict()
-        for i in range(1, n + 2):
-            e[(i, i - 1)] = self.q[i - 1]
-            w[(i, i - 1)] = self.q[i - 1]
-        for l in range(1, n + 1):
-            for i in range(1, n - l + 2):
-                j = i + l - 1
+        for i in range(n + 1):
+            e[(i, i - 1)] = self.q[i]
+            w[(i, i - 1)] = self.q[i]
+        for l in range(n):
+            for i in range(n - l):
+                j = i + l
                 e[(i, j)] = float("inf")
-                w[(i, j)] = w[(i, j - 1)] + self.p[j - 1] + self.q[j]
+                w[(i, j)] = w[(i, j - 1)] + self.p[j] + self.q[j + 1]
                 for r in range(i, j + 1):
                     t = round(e[(i, r - 1)] + e[(r + 1, j)] + w[(i, j)], 2)
                     if t < e[(i, j)]:
@@ -31,17 +31,17 @@ class OptimalBST:
     def construct_optimal_bst(self, i, j):
         k = self.root[(i, j)]
         if len(self.p) == j - i + 1:
-            print "k[%d] is the root" % k
+            print "k[%d] is the root" % (k + 1)
         if i <= k - 1:
-            print "k[%d] is the left child of k[%d]" % (self.root[(i, k - 1)], k)
+            print "k[%d] is the left child of k[%d]" % (self.root[(i, k - 1)] + 1, k + 1)
             self.construct_optimal_bst(i, k - 1)
         else:
-            print "d[%d] is the left child of k[%d]" % (i - 1, k)
+            print "d[%d] is the left child of k[%d]" % (i, k + 1)
         if k + 1 <= j:
-            print "k[%d] is the right child of k[%d]" % (self.root[(k + 1, j)], k)
+            print "k[%d] is the right child of k[%d]" % (self.root[(k + 1, j)] + 1, k + 1)
             self.construct_optimal_bst(k + 1, j)
         else:
-            print "d[%d] is the right child of k[%d]" % (j, k)
+            print "d[%d] is the right child of k[%d]" % (j + 1, k + 1)
 
 if __name__ == "__main__":
     import argparse
@@ -53,6 +53,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     bst = OptimalBST(args.p, args.q)
     bst.optimal_bst(len(args.p))
-    bst.construct_optimal_bst(1, len(bst.p))
+    bst.construct_optimal_bst(0, len(bst.p) - 1)
 
 
