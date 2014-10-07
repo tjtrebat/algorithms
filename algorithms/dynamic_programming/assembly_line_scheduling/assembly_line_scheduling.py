@@ -25,9 +25,9 @@ class AssemblyLineScheduler:
         for j in range(1, self.num_stations):
             for i, line in enumerate(self.assembly_lines):
                 station = line.stations[j]
+                other_line = self.assembly_lines[(i + 1) % 2]
                 # get fastest time from previous station on the same line
                 line_time = line.fastest_times[j - 1] + station.assembly_time
-                other_line = self.assembly_lines[(i + 1) % 2]
                 # get fastest time from previous station on the other line plus the transfer time
                 other_line_time = (other_line.fastest_times[j - 1] + other_line.stations[j - 1].transfer_time
                                    + station.assembly_time)
@@ -65,8 +65,8 @@ class AssemblyLineScheduler:
         """
         if n > 0:
             station = line.stations[n]
-            line_time = self._fastest_way_recursive(n - 1, line, i) + station.assembly_time
             other_line = self.assembly_lines[(i + 1) % 2]
+            line_time = self._fastest_way_recursive(n - 1, line, i) + station.assembly_time
             other_line_time = (self._fastest_way_recursive(n - 1, other_line, (i + 1) % 2)
                            + other_line.stations[n - 1].transfer_time + station.assembly_time)
             if line_time <= other_line_time:
@@ -136,28 +136,6 @@ class AssemblyLine:
         self.fastest_times = [0] * len(stations)
         self.fastest_lines = [-1] * (len(stations) - 1)
 
-    @classmethod
-    def read_assembly_line(cls, txt_line):
-        """ Reads lines of text that describe an individual assembly line.
-        """
-        arr_line = map(int, txt_line.split())
-        if len(arr_line) > 1:
-            entry_time, exit_time, stations = -1, -1, []
-            i = 0
-            while i < len(arr_line):
-                if not i:
-                    entry_time = arr_line[i]
-                elif len(arr_line) <= i + 1:
-                    exit_time = arr_line[i]
-                elif len(arr_line) > i:
-                    if len(arr_line) <= i + 2:
-                        stations.append(Station(arr_line[i]))
-                    else:
-                        stations.append(Station(arr_line[i], arr_line[i + 1]))
-                        i += 1
-                i += 1
-            return AssemblyLine(entry_time, exit_time, stations)
-
     def __str__(self):
         """ A string representation of the AssemblyLine.
         """
@@ -184,23 +162,55 @@ class Station:
         """
         return str(self.assembly_time)
 
+def read_assembly_lines_from_file(infile):
+    """ Reads a file containing assembly line data. Format of the file is specified as follows. Assuming an assembly
+    line with k stations, containing k - 1 transfers to stations on a separate line. Each line of data designates an
+    individual assembly line. The first number represents the entry time to the line, and is followed by successive
+    pairs of assembly and transfer times for each station in order of their arrival, i.e.:
+
+        <entry_time> <assembly_time_1> <transfer_time_1> ... <assembly_time_k> <transfer_time_k> <exit_time>
+    """
+    txt = infile.read()
+    if txt:
+        lines = txt.split("\n")
+        if len(lines) > 1:
+            assembly_line_1 = read_assembly_line_from_txt(lines[0])
+            assembly_line_2 = read_assembly_line_from_txt(lines[1])
+            if len(assembly_line_1.stations) == len(assembly_line_2.stations):
+                return assembly_line_1, assembly_line_2
+
+def read_assembly_line_from_txt(txt_line):
+    """ Reads a line of text representing an individual assembly line.
+    """
+    arr_line = map(int, txt_line.split())
+    if len(arr_line) > 1:
+        entry_time, exit_time, stations = -1, -1, []
+        i = 0
+        while i < len(arr_line):
+            if not i:
+                entry_time = arr_line[i]
+            elif len(arr_line) <= i + 1:
+                exit_time = arr_line[i]
+            elif len(arr_line) > i:
+                if len(arr_line) <= i + 2:
+                    stations.append(Station(arr_line[i]))
+                else:
+                    stations.append(Station(arr_line[i], arr_line[i + 1]))
+                    i += 1
+            i += 1
+        return AssemblyLine(entry_time, exit_time, stations)
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Finds the fastest way through a factory')
     parser.add_argument('infile', type=argparse.FileType('r'))
     parser.add_argument('--recursive', action='store_true', help='use a recursive method to solve')
     args = parser.parse_args()
-    infile = args.infile
-    txt = infile.read()
-    if txt:
-        lines = txt.split("\n")
-        if len(lines) > 1:
-            assembly_line_1 = AssemblyLine.read_assembly_line(lines[0])
-            assembly_line_2 = AssemblyLine.read_assembly_line(lines[1])
-            if assembly_line_1 and assembly_line_2 is not None:
-                als = AssemblyLineScheduler(assembly_line_1, assembly_line_2)
-                if args.recursive:
-                    als.fastest_way_recursive()
-                else:
-                    als.fastest_way()
-                als.print_stations_in_order()
+    assembly_line_1, assembly_line_2 = read_assembly_lines_from_file(args.infile)
+    if assembly_line_1 and assembly_line_2 is not None:
+        als = AssemblyLineScheduler(assembly_line_1, assembly_line_2)
+        if args.recursive:
+            als.fastest_way_recursive()
+        else:
+            als.fastest_way()
+        als.print_stations_in_order()
