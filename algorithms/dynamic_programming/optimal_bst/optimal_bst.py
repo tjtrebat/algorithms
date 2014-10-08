@@ -11,8 +11,7 @@ class OptimalBST:
         self.root = dict()
 
     def optimal_bst(self, n):
-        e = dict()
-        w = dict()
+        e, w = dict(), dict()
         for i in range(n + 1):
             e[(i, i - 1)] = self.q[i]
             w[(i, i - 1)] = self.q[i]
@@ -27,6 +26,30 @@ class OptimalBST:
                         e[(i, j)] = t
                         self.root[(i, j)] = r
         return e
+
+    def optimal_bst_recursive(self, n):
+        e, w = dict(), dict()
+        for i in range(n + 1):
+            e[(i, i - 1)] = self.q[i]
+            w[(i, i - 1)] = self.q[i]
+        for l in range(n):
+            for i in range(n - l):
+                j = i + l
+                w[(i, j)] = w[(i, j - 1)] + self.p[j] + self.q[j + 1]
+        self._optimal_bst_recursive(0, len(self.p) - 1, e, w)
+        return e
+
+    def _optimal_bst_recursive(self, i, j, e, w):
+        if i <= j:
+            e[(i, j)] = float("inf")
+            for r in range(i, j + 1):
+                t = round(self._optimal_bst_recursive(i, r - 1, e, w) +
+                          self._optimal_bst_recursive(r + 1, j, e, w) +
+                          w[(i, j)], 2)
+                if t < e[(i, j)]:
+                    e[(i, j)] = t
+                    self.root[(i, j)] = r
+        return e[(i, j)]
 
     def construct_optimal_bst(self, i, j):
         k = self.root[(i, j)]
@@ -50,9 +73,13 @@ if __name__ == "__main__":
         help='A list of probabilities of each key', required=True)
     parser.add_argument('--q', metavar='Q', type=float, nargs='+',
         help='A list of probabilities of each dummy key', required=True)
+    parser.add_argument('--recursive', action='store_true', help='use a recursive method to solve')
     args = parser.parse_args()
-    bst = OptimalBST(args.p, args.q)
-    bst.optimal_bst(len(args.p))
-    bst.construct_optimal_bst(0, len(bst.p) - 1)
+    optimal_bst = OptimalBST(args.p, args.q)
+    if args.recursive:
+        optimal_bst.optimal_bst_recursive(len(args.p))
+    else:
+        optimal_bst.optimal_bst(len(args.p))
+    optimal_bst.construct_optimal_bst(0, len(args.p) - 1)
 
 

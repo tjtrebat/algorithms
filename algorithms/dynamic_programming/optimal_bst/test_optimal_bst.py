@@ -11,3 +11,7 @@ class TestOptimalBST(TestCase):
     def test_optimal_bst(self):
         n = len(self.optimal_bst.p)
         self.assertEquals(self.optimal_bst.optimal_bst(n)[(0, n - 1)], self.cost)
+
+    def test_optimal_bst_recursive(self):
+        n = len(self.optimal_bst.p)
+        self.assertEquals(self.optimal_bst.optimal_bst_recursive(n)[(0, n - 1)], self.cost)
