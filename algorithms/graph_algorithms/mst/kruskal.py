@@ -29,7 +29,7 @@ class Kruskal:
     """ Kruskal computes a minimum-spanning-tree of a weighted, undirected graph by adding a safe edge of least weight.
     """
     def __init__(self, nodes, edges):
-        """ Contructs a new Kruskal object.
+        """ Constructs a new Kruskal object.
 
         Attributes:
             nodes -- a list of Nodes
