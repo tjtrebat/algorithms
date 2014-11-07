@@ -6,72 +6,56 @@ version of quicksort to obtain a good average-case performance over all inputs.
 __author__ = 'Tom'
 
 import random
-
-class Quicksort(object):
-    """
-    A class that contains methods that implement the quicksort sorting algorithm.
-    """
-    def __init__(self, data):
-        """ Initializes a new Quicksort object
-
-        Attributes:
-
-            data -- an array of integers
-        """
-        self.data = data
         
-    def sort(self, p, r):
-        """ Sorts the elements of self.data from p to r
+def sort(data, p, r):
+    """ Sorts the data from p to r
 
-        Attributes:
+    Attributes:
 
-            p -- a starting index
-            r -- an end index
-        """
-        if p < r:
-            q = self.partition(p, r)
-            self.sort(p, q - 1)
-            self.sort(q + 1, r)
-    
-    def partition(self, p, r):
-        """ Partitions the subarray self.data[p..r] around a pivot element, self.data[r], moving it into its place in
-        the array.
+        data -- an array of elements
+        p -- a starting index
+        r -- an end index
+    """
+    if p < r:
+        q = partition(data, p, r)
+        sort(data, p, q - 1)
+        sort(data, q + 1, r)
+    return data
 
-        Attributes:
+def partition(data, p, r):
+    """ Partitions the subarray data[p..r] around a pivot element, data[r], moving it into its place in
+    the array.
 
-            p -- a starting index
-            r -- an end index
-        """
-        x = self.data[r]
-        i = p - 1
-        for j in range(p, r):
-            if self.data[j] <= x:
-                i += 1
-                self.swap(i, j)
-        self.swap(i + 1, r)
-        return i + 1
+    Attributes:
 
-    def swap(self, i, j):
-        """ Swap elements at i and j
-        """
-        temp = self.data[i]
-        self.data[i] = self.data[j]
-        self.data[j] = temp
-    
-    def randomized_sort(self, p, r):
-        """ Sorts the elements of self.data from p to r using a randomized partition.
-        """
-        if p < r:
-            q = self.randomized_partition(p, r)
-            self.randomized_sort(p, q - 1)
-            self.randomized_sort(q + 1, r)
-    
-    def randomized_partition(self, p, r):
-        """ Partitions the subarray self.data[p..r] around a randomly-chosen pivot element.
-        """
-        i = random.randint(p, r)
-        self.swap(r, i)
-        return self.partition(p, r)
+        data -- an array of elements
+        p -- a starting index
+        r -- an end index
+    """
+    x = data[r]
+    i = p - 1
+    for j in range(p, r):
+        if data[j] <= x:
+            i += 1
+            data[i], data[j] = data[j], data[i]
+    data[i + 1], data[r] = data[r], data[i + 1]
+    return i + 1
+
+def randomized_sort(data, p, r):
+    """ Sorts the data from p to r using a randomized partition.
+    """
+    if p < r:
+        q = randomized_partition(data, p, r)
+        randomized_sort(data, p, q - 1)
+        randomized_sort(data, q + 1, r)
+    return data
+
+def randomized_partition(data, p, r):
+    """ Partitions the subarray data[p..r] around a randomly-chosen pivot element.
+    """
+    i = random.randint(p, r)
+    data[r], data[i] = data[i], data[r]
+    return partition(data, p, r)
 
 if __name__ == "__main__":
     import argparse
@@ -86,8 +70,5 @@ if __name__ == "__main__":
     # populates end index if it is None
     if args.end is None:
         args.end = len(args.integers) - 1
-    # sort the integers
-    q = Quicksort(args.integers)
-    q.randomized_sort(args.begin, args.end)
-    # print the resulting, sorted array
-    print q.data
+    # print sorted array
+    print randomized_sort(args.integers, args.begin, args.end)

@@ -3,8 +3,7 @@ test_quicksort.py -- tests the quicksort and select modules.
 """
 import random
 from unittest import TestCase
-from algorithms.sorting.quicksort.quicksort import *
-from algorithms.sorting.quicksort.select import *
+from algorithms.sorting.quicksort import quicksort, select
 
 __author__ = 'Tom'
 
@@ -14,19 +13,19 @@ class TestQuicksort(TestCase):
     def setUp(self):
         """ Sets up each test case
         """
-        self.q = Quicksort([2, 8, 7, 1, 3, 5, 6, 4])
+        self.data = [2, 8, 7, 1, 3, 5, 6, 4]
 
     def test_sort(self):
         """ Tests sort
         """
-        self.q.sort(0, len(self.q.data) - 1)
-        self.assertEqual(self.q.data, sorted(self.q.data))
+        self.assertEqual(sorted(self.data),
+            quicksort.sort(self.data, 0, len(self.data) - 1))
 
     def test_randomized_sort(self):
         """ Tests randomized sort
         """
-        self.q.randomized_sort(0, len(self.q.data) - 1)
-        self.assertEqual(self.q.data, sorted(self.q.data))
+        self.assertEqual(sorted(self.data),
+            quicksort.randomized_sort(self.data, 0, len(self.data) - 1))
 
 class TestSelect(TestCase):
     """ TestSelect tests the functions in Select
@@ -34,16 +33,18 @@ class TestSelect(TestCase):
     def setUp(self):
         """ Sets up each test case
         """
-        self.s = Select([2, 8, 7, 1, 3, 5, 6, 4])
+        self.data = [2, 8, 7, 1, 3, 5, 6, 4]
 
     def test_select(self):
         """ Tests select
         """
-        for i in range(len(self.s.data)):
-            self.assertEqual(self.s.select(0, len(self.s.data) - 1, i + 1), sorted(self.s.data)[i])
+        for i in range(len(self.data)):
+            self.assertEqual(sorted(self.data)[i],
+                select.select(self.data, 0, len(self.data) - 1, i + 1))
 
     def test_randomized_select(self):
         """ Tests randomized select
         """
-        for i in range(len(self.s.data)):
-            self.assertEqual(self.s.randomized_select(0, len(self.s.data) - 1, i + 1), sorted(self.s.data)[i])
+        for i in range(len(self.data)):
+            self.assertEqual(sorted(self.data)[i],
+                select.randomized_select(self.data, 0, len(self.data) - 1, i + 1))
